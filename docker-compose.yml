@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  #mongodb
+  mongo_db:
+    container_name: db_container
+    image: mongo:latest
+    restart: always
+    ports:
+      - 6000:5000
+    networks:
+      - app-network
+
+  #node backend
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: npm run dev
+    ports:
+      - 4000:5000
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb+srv://ReactMongo:Pavankalyan_098@cluster0.fdplpff.mongodb.net/CRUD_DB?retryWrites=true&w=majority
+      DB_NAME: CRUD_DB
+    depends_on:
+      - mongo_db
+
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: myapp-react-frontend
+    command: npm start
+    depends_on:
+      - api
+    ports:
+      - "7000:3000"
+    networks:
+      - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+
